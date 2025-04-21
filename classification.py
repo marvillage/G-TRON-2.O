@@ -318,9 +318,7 @@ st.markdown("""
 # import base64
 # import torch
 
-# # --- CONFIG ---
-# GEMINI_API_KEY = "AIzaSyBU-gTwq3RqqGGDrY0s8BHS-bM9Sa8O7LY"
-# genai.configure(api_key=GEMINI_API_KEY)
+
 
 # # --- CUSTOM CSS ---
 # st.set_page_config(
