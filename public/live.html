@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electronic Device Detector</title>
+    <style>
+        :root {
+            --primary-color: #4bb6f0;
+            --primary-hover: #0e94e5;
+            --primary-light: #65c4f8;
+            --bg-dark: #0a1218;
+            --bg-card: #142330;
+            --bg-area: #1a2b3c;
+            --bg-result: #1d3649;
+            --border-color: #2c4356;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b8c5d9;
+            --text-accent: #65c4f8;
+            --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 15px rgba(75, 182, 240, 0.15);
+            --gradient-blue: linear-gradient(135deg, #1a7fc2, #4bb6f0);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 15% 85%, rgba(75, 182, 240, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 85% 15%, rgba(75, 182, 240, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--bg-card);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: var(--shadow-soft), var(--shadow-glow);
+            border: 1px solid rgba(44, 67, 86, 0.3);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 2.2rem;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 40px 30px;
+            text-align: center;
+            margin: 30px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: var(--bg-area);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(26, 43, 60, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-area::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(75, 182, 240, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .upload-area:hover::after {
+            opacity: 1;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 20px auto;
+            display: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+        }
+
+        button {
+            background: var(--gradient-blue);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(26, 127, 194, 0.3);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(26, 127, 194, 0.4);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(26, 127, 194, 0.4);
+        }
+
+        button:disabled {
+            background: rgba(26, 127, 194, 0.3);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 20px 25px;
+            border-radius: 10px;
+            background-color: var(--bg-result);
+            min-height: 80px;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .result-title {
+            font-size: 1.2rem;
+            color: var(--text-accent);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-title i {
+            font-size: 1.4rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(75, 182, 240, 0.15);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        strong {
+            color: var(--text-accent);
+        }
+
+        /* Device list styling */
+        .device-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+
+        .device-list li {
+            position: relative;
+            padding: 10px 15px 10px 30px;
+            background-color: rgba(75, 182, 240, 0.1);
+            margin-bottom: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .device-list li:hover {
+            background-color: rgba(75, 182, 240, 0.15);
+            transform: translateX(2px);
+        }
+
+        .device-list li::before {
+            content: "•";
+            color: var(--primary-color);
+            position: absolute;
+            left: 12px;
+            font-size: 18px;
+            top: 8px;
+        }
+
+        .device-count {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 12px;
+            padding: 1px 8px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .upload-area {
+                padding: 25px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Electronic Device Detector</h1>
+        <p class="subtitle">Upload an image to identify electronic devices</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📤</div>
+            <p><strong>Click or drag</strong> to upload your image</p>
+            <p style="opacity: 0.7; font-size: 0.9rem;">Supports JPG, PNG, WEBP images</p>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            <img id="imagePreview" alt="Preview">
+        </div>
+        
+        <div class="button-container">
+            <button id="detectBtn" disabled>
+                <span>Detect Devices</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+            </button>
+        </div>
+        
+        <div id="result">
+            <div class="result-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span>Status</span>
+            </div>
+            <p>Upload an image and click "Detect Devices" to see results</p>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const detectBtn = document.getElementById('detectBtn');
+        const imagePreview = document.getElementById('imagePreview');
+        const resultDiv = document.getElementById('result');
+       
+        // Handle file selection
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.match('image.*')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    imagePreview.src = event.target.result;
+                    imagePreview.style.display = 'block';
+                    detectBtn.disabled = false;
+                    resultDiv.innerHTML = `
+                        <div class="result-title">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span>Ready</span>
+                        </div>
+                        <p>Image loaded! Click the "Detect Devices" button to analyze.</p>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--primary-color)';
+            uploadArea.style.backgroundColor = 'rgba(75, 182, 240, 0.05)';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'var(--border-color)';
+            uploadArea.style.backgroundColor = 'var(--bg-area)';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--border-color)';
+            uploadArea.style.backgroundColor = 'var(--bg-area)';
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.match('image.*')) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        });
+        
+        // Detection function
+        detectBtn.addEventListener('click', async () => {
+            if (!fileInput.files.length) return;
+            
+            const file = fileInput.files[0];
+            detectBtn.disabled = true;
+            resultDiv.innerHTML = `
+                <div class="result-title">
+                    <div class="loading"></div>
+                    <span>Processing</span>
+                </div>
+                <p>Analyzing your image... This may take a few moments.</p>
+            `;
+            
+            try {
+                // Create FormData to send the file
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('text_input', 'Just return the name of electronic devices in this image in the form of a list,for example if u have an image of a laptop,mouse,monitor. you should return [laptop,mouse,monitor]');
+                formData.append('system_prompt', 'You are an experienced electronic device detector');
+                formData.append('model_id', 'Qwen/Qwen2-VL-7B-Instruct');
+                formData.append('api_name', '/run_example');
+
+                // Fetch API call
+                const response = await fetch('http://localhost:5000/api/detect', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Process the result - check if it's a list
+                let resultText = data.result;
+                let deviceList = [];
+                
+                // Try to parse if it's in a list format like [device1, device2, device3]
+                if (resultText.includes('[') && resultText.includes(']')) {
+                    const extractedList = resultText.substring(
+                        resultText.indexOf('[') + 1, 
+                        resultText.lastIndexOf(']')
+                    );
+                    deviceList = extractedList.split(',').map(item => item.trim());
+                } 
+                // Or check for comma-separated list without brackets
+                else if (resultText.includes(',')) {
+                    deviceList = resultText.split(',').map(item => item.trim());
+                }
+                // Just a single item
+                else {
+                    deviceList = [resultText.trim()];
+                }
+                
+                // Filter out empty entries
+                deviceList = deviceList.filter(device => device.length > 0);
+                
+                // Display the results
+                if (deviceList.length > 0) {
+                    const deviceCount = deviceList.length;
+                    resultDiv.innerHTML = `
+                        <div class="result-title">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4bb6f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span>Detection Complete</span>
+                            <span class="device-count">${deviceCount}</span>
+                        </div>
+                        <p>Found ${deviceCount} electronic ${deviceCount === 1 ? 'device' : 'devices'} in your image:</p>
+                        <ul class="device-list">
+                            ${deviceList.map(device => `<li>${device}</li>`).join('')}
+                        </ul>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result-title">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4bb6f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                            <span>No Devices Found</span>
+                        </div>
+                        <p>No electronic devices were detected in this image. Try uploading another image.</p>
+                    `;
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result-title">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span style="color: #ff6b6b;">Error</span>
+                    </div>
+                    <p>${error.message || 'Failed to process your request. Please try again.'}</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px;">The server may be offline or there might be an issue with your connection. Check that the API is running at <strong>http://localhost:5000</strong>.</p>
+                `;
+                console.error('Detection error:', error);
+            } finally {
+                detectBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Classifier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #image-preview {
+            max-width: 300px;
+            margin: 20px auto;
+            display: block;
+        }
+        #upload-form {
+            margin-top: 20px;
+        }
+        #result {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Upload an Image for Prediction</h2>
+    <input type="file" id="image-input" accept="image/*">
+    <img id="image-preview" style="display: none;">
+    <button onclick="uploadImage()">Predict</button>
+
+    <p id="result"></p>
+
+    <script>
+        function uploadImage() {
+            let fileInput = document.getElementById('image-input');
+            if (fileInput.files.length === 0) {
+                alert("Please select an image first.");
+                return;
+            }
+
+            let file = fileInput.files[0];
+            let formData = new FormData();
+            formData.append("file", file);
+
+            fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerText = `Prediction: ${data.prediction}, Confidence: ${data.confidence.toFixed(2)}`;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("result").innerText = "Error making prediction.";
+            });
+
+            // Preview the selected image
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let imgPreview = document.getElementById('image-preview');
+                imgPreview.src = e.target.result;
+                imgPreview.style.display = "block";
+            }
+            reader.readAsDataURL(file);
+        }
+    </script>
+
+</body>
+</html>
