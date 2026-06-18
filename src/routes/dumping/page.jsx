@@ -520,8 +520,15 @@ function DumpingPage() {
                 )
               ))}
             </GoogleMap>
-          ) : (
+          ) : import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? (
             <div className="loading-map">Loading map...</div>
+          ) : (
+            <div className="loading-map" style={{ padding: '2rem', textAlign: 'center', lineHeight: 1.6 }}>
+              🗺️ Interactive map unavailable in this demo.
+              <br />
+              Set a <code>VITE_GOOGLE_MAPS_API_KEY</code> environment variable to enable the
+              live dumping-detection map.
+            </div>
           )}
         </section>
         

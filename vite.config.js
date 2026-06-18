@@ -24,7 +24,11 @@ export default defineConfig({
     },
     build: {
         commonjsOptions: {
-            include: [/leaflet/]
-        }
+            // Must include node_modules broadly (not just leaflet) so CommonJS
+            // deps like react/react-dom have their named exports detected by
+            // Rollup during `vite build`. Narrowing this to [/leaflet/] broke
+            // the production build ("createContext is not exported by react").
+            include: [/leaflet/, /node_modules/],
+        },
     }
 });
